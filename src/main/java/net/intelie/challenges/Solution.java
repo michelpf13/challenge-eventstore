@@ -5,10 +5,11 @@ import java.util.*;
 import java.util.function.Predicate;
 
 /**
- *  An alternative option for the Synchronized List would be to use the Hashmap (or ConcurrentHashMap). In this case, the type would be used as the key and an Event Arraylist would be used as the value.
+ *  An alternative option for the Synchronized List would be to use the Hashmap (or ConcurrentHashMap) class. In this case, the type would be used as the key and an Event Arraylist would be used as the value.
  *  So removal would be made easier. However, for each type a new ArrayList would need to be created for insertion.
  *
- *  Therefore, the Synchronized List was chosen for the task, as it is easily implemented and simple to understand, in addition to working well for the problem.
+ *  Therefore, the Synchronized List was chosen for the task, as it is easily implemented and simple to understand, in addition to working well for the problem. It is only necessary
+ *  to ensure that the reference of the list does not change during execution.
  */
 
 
@@ -42,7 +43,7 @@ public class Solution implements EventStore {
      *
      * @param type       Removes all events of the same type.
      *
-     * Creates an auxiliary list to store the events to be deleted. That way if there is an interruption in the execution the status of the main list will not be partially modified.
+     * Creates an auxiliary list to store the events that will be deleted. That way, if there is an interruption during execution, the status of the main list will not be partially modified.
      */
 
     @Override
@@ -66,7 +67,8 @@ public class Solution implements EventStore {
      * @param endTime   End timestamp (exclusive).
      * @return The query result. An inner class that implements the EventIterator interface.
      *
-     * Creates an iterator over the list of events filtered according to the parameters passed as arguments.
+     * The predicate returns elements with the type and time interval passed as parameter. Then creates an iterator over the list of events filtered according to the predicate condition.
+     *
      */
 
     @Override
@@ -111,9 +113,7 @@ public class Solution implements EventStore {
     /**
      * Inner class that implements the EventIterator interface. Implements methods for traversing, returning and removing events within a specific query.
      *
-     * ArrayList with specific events only.
-     *
-     * Integers to control the current and final positions of the query list.
+     * Event variable to store the current event and boolean for controlling the call to the moveNext() function
      */
 
     public class MyIterator implements EventIterator {
@@ -129,22 +129,27 @@ public class Solution implements EventStore {
 
         /**
          *
-         * @return Moves the iterator to the next query element, if any.
+         * @return True or False. Moves the iterator to the next query element, if any.
          */
 
         @Override
         public boolean moveNext() {
-            moveState = true;
             if (queryIterator.hasNext()) {
+                moveState = true;
                 currentEvent = queryIterator.next();
                 return true;
             }
-            return false;
+            else {
+                moveState = false;
+                currentEvent = null;
+                return false;
+            }
         }
 
         /**
          *
          * @return Returns the current event that the iterator is pointing to.
+         * If moveNext has never been called or your last result was false, throw an exception.
          */
 
         @Override
@@ -155,7 +160,7 @@ public class Solution implements EventStore {
 
         /**
          * Removes the current event from the query. Synchronizes access to the event list to avoid concurrency problems.
-         * If moveNext has never been called, throw an exception.
+         * If moveNext has never been called or your last result was false, throw an exception.
          */
 
         @Override

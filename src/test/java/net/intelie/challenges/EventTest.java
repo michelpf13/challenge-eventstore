@@ -13,6 +13,9 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * In all tests myEvents is the expected result array for each test.
+ *
+ * For the concurrency tests a ExecutorService is used. ExecutorService is a JDK API that simplifies running tasks in asynchronous mode.
+ * ExecutorService automatically provides a pool of threads and an API for assigning tasks to it.
  */
 public class EventTest {
     private Event event1 = new Event("some_type", 123L);
